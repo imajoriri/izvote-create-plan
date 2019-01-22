@@ -34,22 +34,24 @@ exports.handler = async (event) => {
     }).catch( err => {
       console.log(err);
       status = "err";
+      msg = "fetch geometry error";
     });
   }
 
   // ぐるなびから店情報を取得
   var restInfos;
-  await fetchRestSearch(lon, lat).then( data => {
+  await fetchRestSearch(lon, lat, event.conditions).then( data => {
     restInfos = data;
   }).catch( err => {
     status = "err";
+    msg = "fetch rest serch error";
   });
 
-  // firebaseに保存するためのモデル等作成
-  var rest = restInfos.rest
-
   // レストラン（居酒屋）が取得できたら、ランダムに並べたり
-  if(rest){
+  if(restInfos){
+    var rest = restInfos.rest
+
+    // planのkeyとなるID取得
     var planID = getPlanID(event.groupID);
 
     // dbにPlanモデルを保存
@@ -63,16 +65,22 @@ exports.handler = async (event) => {
     ).catch( err => {
       console.log(err);
       status = "err";
+      msg = "set plan model";
     });
 
     await setGroupModel(db, planID, event.groupID).catch( err => {
       console.log(err);
       status = "err";
+      msg = "set group model error"
     });
+
+    // 全て保存できたからOKを返す
+    status = "ok";
   }
   // 取得できなかったら、、
   else{
     status = "err";
+    msg = "not found rest info";
   }
 
   const response = {
