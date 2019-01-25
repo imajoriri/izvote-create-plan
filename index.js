@@ -61,12 +61,12 @@ exports.handler = async (event) => {
       event.groupID,
       event.lineID,
       event.station,
-      rest
-    ).catch( err => {
-      console.log(err);
-      status = "err";
-      msg = "set plan model";
-    });
+      event.conditions,
+      rest).catch( err => {
+        console.log(err);
+        status = "err";
+        msg = "set plan model";
+      });
 
     await setGroupModel(db, planID, event.groupID).catch( err => {
       console.log(err);
@@ -87,7 +87,16 @@ exports.handler = async (event) => {
     status: status,
     msg: msg,
   };
-  return response;
+
+  return {
+    statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin" : "*",
+      "Access-Control-Allow-Credentials": true,
+    },
+    body: JSON.stringify(response)
+  };
+  //return response;
 };
 
 

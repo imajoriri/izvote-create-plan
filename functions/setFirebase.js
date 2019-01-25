@@ -1,6 +1,6 @@
 require('date-utils');
 
-exports.setPlanModel = async (db, planID, groupID, lineID, station, rest) => {
+exports.setPlanModel = async (db, planID, groupID, lineID, station, conditions, rest) => {
   var planRef = db.ref("plan");
 
   // updatedAtとupdatedAt用の時間
@@ -18,7 +18,7 @@ exports.setPlanModel = async (db, planID, groupID, lineID, station, rest) => {
     groupID: groupID,
     createdBy: lineID,
     station: station,
-    //conditions: conditions,
+    conditions: conditions,
     shops: shops,
     updatedAt: formatted,
     createdAt: formatted,
