@@ -21,15 +21,16 @@ var ref = db.ref("/");
 
 // event >> station, conditions, groupID, line_user_id
 exports.handler = async (event) => {
+  var body = JSON.parse(event.body);
   // フロント側に返すステータス
   // 問題なしなら "OK"
   var status;
   var msg;
 
   // google apiから駅の緯度経度取得
-  if(event.station){
+  if(body.station){
     var lon, lat;
-    await fetchGeometry(event.station).then( data => {
+    await fetchGeometry(body.station).then( data => {
       [lon, lat] = data;
     }).catch( err => {
       console.log(err);
@@ -40,7 +41,7 @@ exports.handler = async (event) => {
 
   // ぐるなびから店情報を取得
   var restInfos;
-  await fetchRestSearch(lon, lat, event.conditions).then( data => {
+  await fetchRestSearch(lon, lat, body.conditions).then( data => {
     restInfos = data;
   }).catch( err => {
     status = "err";
@@ -52,23 +53,23 @@ exports.handler = async (event) => {
     var rest = restInfos.rest
 
     // planのkeyとなるID取得
-    var planID = getPlanID(event.groupID);
+    var planID = getPlanID(body.groupID);
 
     // dbにPlanモデルを保存
     await setPlanModel(
       db,
       planID,
-      event.groupID,
-      event.lineID,
-      event.station,
-      event.conditions,
+      body.groupID,
+      body.lineID,
+      body.station,
+      body.conditions,
       rest).catch( err => {
         console.log(err);
         status = "err";
         msg = "set plan model";
       });
 
-    await setGroupModel(db, planID, event.groupID).catch( err => {
+    await setGroupModel(db, planID, body.groupID).catch( err => {
       console.log(err);
       status = "err";
       msg = "set group model error"
