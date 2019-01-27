@@ -13,7 +13,7 @@ exports.fetchRestSearch = async (lon, lat, conditions) => {
       longitude: lon,
       latitude: lat,
       range: 3, // 1:300m、2:500m、3:1000m、4:2000m、5:3000m
-      hit_per_page: 20, // ヒット件数
+      hit_per_page: 10, // ヒット件数
       private_room: conditions.privateRoom, // 1だと個室あり
       bottomless_cup: conditions.bottomlessCup, // 1だと飲み放題あり
       buffet: conditions.buffet, // 1だと食べ放題あり

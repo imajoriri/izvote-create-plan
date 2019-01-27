@@ -11,7 +11,15 @@ exports.setPlanModel = async (db, planID, groupID, lineID, station, conditions, 
   // ぐるなびから得られたrestのidをキーとして保存する
   var shops = {};
   for(var i in rest){
-    shops[rest[i].id] = true;
+    //shops[rest[i].id] = true;
+    shops[String(i)] = {
+      id: rest[i].id,
+      imgURL: rest[i].image_url.shop_image1,
+      name: rest[i].name,
+      budget: rest[i].budget,
+      pr_short: rest[i].pr.pr_short,
+      url_mobile: rest[i].url_mobile,
+    }
   }
 
   var data = {
