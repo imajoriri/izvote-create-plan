@@ -1,6 +1,7 @@
 require('date-utils');
+var { constant } = require("./../constant");
 
-exports.setPlanModel = async (db, planID, groupID, lineID, station, conditions, rest) => {
+exports.setPlanModel = async (db, planId, groupId, lineId, station, conditions, rest) => {
   var planRef = db.ref("plan");
 
   // updatedAtとupdatedAt用の時間
@@ -11,20 +12,30 @@ exports.setPlanModel = async (db, planID, groupID, lineID, station, conditions, 
   // ぐるなびから得られたrestのidをキーとして保存する
   var shops = {};
   for(var i in rest){
-    //shops[rest[i].id] = true;
-    shops[String(i)] = {
-      id: rest[i].id,
-      imgURL: rest[i].image_url.shop_image1,
-      name: rest[i].name,
-      budget: rest[i].budget,
-      pr_short: rest[i].pr.pr_short,
-      url_mobile: rest[i].url_mobile,
+
+    //画像と、サイトページのURLがない奴は切り捨て
+    if(rest[i].image_url.shop_image1 && rest[i].url_mobile){
+      shops[rest[i].id] = {
+        id: rest[i].id,
+        imgURL: rest[i].image_url.shop_image1,
+        name: rest[i].name,
+        budget: rest[i].budget,
+        prShort: rest[i].pr.pr_short,
+        urlMobile: rest[i].url_mobile,
+        station: rest[i].access.station,
+        walk: rest[i].access.walk,
+      }
+    }
+
+    // 一定数以上取得したら終了
+    if(Object.keys(shops).length > constant.shopsMaxLength){
+      break;
     }
   }
 
   var data = {
-    groupID: groupID,
-    createdBy: lineID,
+    groupId: groupId,
+    createdBy: lineId,
     station: station,
     conditions: conditions,
     shops: shops,
@@ -34,20 +45,23 @@ exports.setPlanModel = async (db, planID, groupID, lineID, station, conditions, 
 
   // planIDをkeyとしてfirebaseに保存
   var plan = {};
-  plan[planID] = data;
+  plan[planId] = data;
 
-  await planRef.update(plan);
+  await planRef.update(plan).catch( err => {
+    console.log(err);
+    throw new Error("set plan model error");
+  });
 
   return "ok";
 };
 
 // 以下のデータ形式
 // 
-exports.setGroupModel = async (db, planID, groupID) => {
-  var groupRef = db.ref("group").child(groupID);
+exports.setGroupModel = async (db, planId, groupId) => {
+  var groupRef = db.ref("group").child(groupId);
 
   var data = {};
-  data[planID] = true;
+  data[planId] = true;
 
   await groupRef.update(data);
 

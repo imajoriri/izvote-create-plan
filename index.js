@@ -48,19 +48,20 @@ exports.handler = async (event) => {
     msg = "fetch rest serch error";
   });
 
-  // レストラン（居酒屋）が取得できたら、ランダムに並べたり
+  // レストラン（居酒屋）が取得できたら、DBに保存
   if(restInfos){
     var rest = restInfos.rest
 
     // planのkeyとなるID取得
-    var planID = getPlanID(body.groupID);
+    //var planID = getPlanID(body.groupID);
+    var planId = body.planId;
 
     // dbにPlanモデルを保存
     await setPlanModel(
       db,
-      planID,
-      body.groupID,
-      body.lineID,
+      planId,
+      body.groupId,
+      body.lineId,
       body.station,
       body.conditions,
       rest).catch( err => {
@@ -69,7 +70,7 @@ exports.handler = async (event) => {
         msg = "set plan model";
       });
 
-    await setGroupModel(db, planID, body.groupID).catch( err => {
+    await setGroupModel(db, planId, body.groupId).catch( err => {
       console.log(err);
       status = "err";
       msg = "set group model error"
