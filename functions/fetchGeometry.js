@@ -4,7 +4,7 @@ var to_json = require('xmljson').to_json;
 // google apiを使って駅の緯度経度を取得
 exports.fetchGeometry = async (station) => {
   var options = {
-    uri: "https://maps.googleapis.com/maps/api/place/findplacefromtext/json", 
+    uri: process.env["geometryURL"],
     method: "GET",
     timeout: 30 * 1000, // タイムアウト指定しないと帰ってこない場合がある
     qs: { 
@@ -20,17 +20,9 @@ exports.fetchGeometry = async (station) => {
   }
 
   // google apiから取得
-  var res = await rp(options);
+  var res = await rp(options)
+
   res = JSON.parse(res);
-
-  // APIから正当な返答が来なかったら、エラーを返す
-  if(res.status !== "OK"){
-    throw new Error("google api error");
-  }
-
-  // log
-  console.log("--- geometry info " + station + "---");
-  console.log(JSON.stringify(res));
 
   // 緯度
   var lat = res.candidates[0].geometry.location.lat;

@@ -1,7 +1,7 @@
 require('date-utils');
 var { constant } = require("./../constant");
 
-exports.setPlanModel = async (db, planId, groupId, lineId, station, conditions, rest) => {
+exports.setPlanModel = async (db, planId, groupId, lineId, station, conditions, rest, designatedRest) => {
   var planRef = db.ref("plan");
 
   // updatedAtとupdatedAt用の時間
@@ -33,12 +33,29 @@ exports.setPlanModel = async (db, planId, groupId, lineId, station, conditions, 
     }
   }
 
+  // 指定されたやつを入れていく
+  var designatedShops = {};
+  for(var i in designatedRest){
+    designatedShops[designatedRest[i].id] = {
+      id: designatedRest[i].id,
+      imgURL: designatedRest[i].image_url.shop_image1,
+      name: designatedRest[i].name,
+      budget: designatedRest[i].budget,
+      prShort: designatedRest[i].pr.pr_short,
+      urlMobile: designatedRest[i].url_mobile,
+      station: designatedRest[i].access.station,
+      walk: designatedRest[i].access.walk,
+    }
+  }
+
+
   var data = {
     groupId: groupId,
     createdBy: lineId,
     station: station,
     conditions: conditions,
-    shops: shops,
+    //shops: shops,
+    shops: Object.assign(designatedShops, shops),
     updatedAt: formatted,
     createdAt: formatted,
   }
@@ -47,10 +64,7 @@ exports.setPlanModel = async (db, planId, groupId, lineId, station, conditions, 
   var plan = {};
   plan[planId] = data;
 
-  await planRef.update(plan).catch( err => {
-    console.log(err);
-    throw new Error("set plan model error");
-  });
+  await planRef.update(plan)
 
   return "ok";
 };
